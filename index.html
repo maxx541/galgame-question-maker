@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>叩問 — Galgame 同好討論題</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700;900&family=Shippori+Mincho:wght@400;500;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<script src="./lame.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #0f0f10;
+    --paper: #f4efe6;
+    --paper-dim: #e8e1d4;
+    --accent: #8b1a1a;        /* 領帶紅 */
+    --accent-soft: #b04545;
+    --sky-top: #5fa3d8;
+    --sky-mid: #8cc3e8;
+    --sky-bottom: #d8e9f3;
+    --char-mute: #6b6b70;
+    --grid: rgba(0,0,0,0.04);
+  }
+  html, body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "Noto Serif TC", "Shippori Mincho", serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+  }
+
+  /* ———————— Hero ———————— */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    isolation: isolate;
+  }
+  .hero::before {
+    /* sky background — uses sky.jpg if present, otherwise gradient */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(15,15,16,0.15) 0%, rgba(15,15,16,0) 35%, rgba(15,15,16,0.55) 100%),
+      url("./sky.jpg") center/cover no-repeat,
+      linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-bottom) 100%);
+    z-index: -2;
+  }
+  .hero::after {
+    /* subtle film grain */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* top date strip — subarashiki hibi 式的小細節 */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 36px;
+    color: rgba(244,239,230,0.85);
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+  }
+  .topbar .right { display: flex; gap: 18px; align-items: center; }
+  .topbar a, .topbar button {
+    color: inherit;
+    background: transparent;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    opacity: 0.75;
+    transition: opacity 0.2s;
+  }
+  .topbar a:hover, .topbar button:hover { opacity: 1; }
+
+  /* hero content — left text, right character */
+  .hero-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    align-items: center;
+    padding: 0 8vw 4vh 8vw;
+    gap: 4vw;
+  }
+  .hero-text {
+    color: var(--paper);
+    background: rgba(15, 15, 16, 0.42);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border: 1px solid rgba(244, 239, 230, 0.12);
+    padding: 48px 52px 52px 52px;
+    box-shadow:
+      0 24px 60px -12px rgba(0,0,0,0.45),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    border-radius: 2px;
+    position: relative;
+  }
+  .hero-text::before {
+    /* tiny corner ornament */
+    content: "";
+    position: absolute;
+    top: 12px; left: 12px;
+    width: 18px; height: 18px;
+    border-top: 1px solid rgba(244,239,230,0.4);
+    border-left: 1px solid rgba(244,239,230,0.4);
+  }
+  .hero-text::after {
+    content: "";
+    position: absolute;
+    bottom: 12px; right: 12px;
+    width: 18px; height: 18px;
+    border-bottom: 1px solid rgba(244,239,230,0.4);
+    border-right: 1px solid rgba(244,239,230,0.4);
+  }
+  .hero-eyebrow {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    opacity: 0.85;
+  }
+  .hero-eyebrow::before {
+    content: "—— ";
+  }
+  .hero-title {
+    font-family: "Shippori Mincho", "Noto Serif TC", serif;
+    font-weight: 800;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1.05;
+    letter-spacing: 0.05em;
+    margin-bottom: 36px;
+  }
+  .hero-title .red {
+    color: var(--accent-soft);
+    display: inline-block;
+    transform: translateY(-4px);
+  }
+  .hero-quotes {
+    max-width: 540px;
+    border-left: 2px solid rgba(244,239,230,0.55);
+    padding-left: 22px;
+    margin-bottom: 48px;
+  }
+  .hero-quotes p {
+    font-size: 17px;
+    line-height: 1.85;
+    margin-bottom: 10px;
+    color: rgba(244,239,230,0.92);
+  }
+  .hero-quotes .attr {
+    font-size: 13px;
+    opacity: 0.7;
+    font-style: italic;
+    margin-top: 6px;
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--paper);
+    padding: 18px 38px;
+    font-family: "Shippori Mincho", "Noto Serif TC", serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.25s ease;
+    text-shadow: none;
+  }
+  .cta::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--paper);
+    transform: translate(6px, 6px);
+    transition: transform 0.25s ease;
+    pointer-events: none;
+  }
+  .cta:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .cta:hover::after {
+    transform: translate(3px, 3px);
+    border-color: var(--accent-soft);
+  }
+  .cta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .cta .arrow {
+    display: inline-block;
+    transition: transform 0.25s ease;
+  }
+  .cta:hover .arrow { transform: translateX(4px); }
+
+  .hero-character {
+    position: relative;
+    height: 75vh;
+    min-height: 480px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .hero-character img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    object-position: bottom;
+    filter: drop-shadow(0 16px 40px rgba(0,0,0,0.45));
+  }
+  .hero-character .placeholder {
+    width: 80%;
+    height: 90%;
+    border: 1px dashed rgba(244,239,230,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(244,239,230,0.5);
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-align: center;
+    padding: 20px;
+    line-height: 1.8;
+  }
+
+  /* vertical title 縱書 — subarashiki hibi feel */
+  .vertical-mark {
+    position: absolute;
+    right: 36px;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    font-family: "Shippori Mincho", serif;
+    font-size: 14px;
+    letter-spacing: 0.5em;
+    color: rgba(244,239,230,0.5);
+    z-index: 1;
+  }
+
+  /* ———————— Question Stage ———————— */
+  .stage {
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 80px 8vw;
+    position: relative;
+    display: none;
+  }
+  .stage.visible { display: block; }
+  .stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  .stage-inner {
+    max-width: 920px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .question-card {
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 56px 56px 48px 56px;
+    position: relative;
+    box-shadow: 12px 12px 0 0 var(--ink);
+  }
+  .question-card .corner-mark {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 8px 18px;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    text-transform: uppercase;
+  }
+  .question-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 18px 0 28px 0;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(15,15,16,0.15);
+  }
+  .question-category {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 6px 16px;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    font-weight: 500;
+  }
+  .question-no {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    color: rgba(15,15,16,0.55);
+    font-size: 14px;
+    letter-spacing: 0.15em;
+  }
+  .question-body {
+    font-family: "Shippori Mincho", "Noto Serif TC", serif;
+    font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1.75;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    margin-bottom: 28px;
+  }
+  .question-context {
+    font-family: "Noto Serif TC", serif;
+    font-size: 16px;
+    line-height: 1.95;
+    color: rgba(15,15,16,0.7);
+    padding: 20px 24px;
+    background: var(--paper-dim);
+    border-left: 3px solid var(--accent);
+  }
+  .question-context::before {
+    content: "補述　";
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+
+  /* recording area */
+  .rec-wrap {
+    margin-top: 32px;
+    border-top: 1px dashed rgba(15,15,16,0.25);
+    padding-top: 22px;
+  }
+  .rec-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .rec-label .l {
+    font-family: "Shippori Mincho", serif;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: rgba(15,15,16,0.7);
+  }
+  .rec-label .l::before {
+    content: "● ";
+    color: var(--accent);
+  }
+  .rec-source {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "Noto Serif TC", serif;
+    font-size: 13px;
+    color: rgba(15,15,16,0.6);
+    letter-spacing: 0.05em;
+  }
+  .rec-source select {
+    background: var(--paper);
+    border: 1px solid rgba(15,15,16,0.3);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 4px 10px;
+    cursor: pointer;
+    outline: none;
+  }
+  .rec-source select:focus { border-color: var(--accent); }
+  .rec-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .rec-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 12px 22px;
+    font-family: "Shippori Mincho", serif;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .rec-btn:hover { background: var(--accent); border-color: var(--accent); }
+  .rec-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .rec-btn.recording {
+    background: var(--accent);
+    border-color: var(--accent);
+    animation: recPulse 1.4s ease-in-out infinite;
+  }
+  .rec-btn .dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--paper);
+  }
+  .rec-btn.recording .dot {
+    background: #ffe2e2;
+    animation: dotBlink 1s ease-in-out infinite;
+  }
+  @keyframes recPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(139,26,26,0.5); }
+    50% { box-shadow: 0 0 0 10px rgba(139,26,26,0); }
+  }
+  @keyframes dotBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .rec-timer {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 18px;
+    letter-spacing: 0.15em;
+    color: rgba(15,15,16,0.7);
+    min-width: 70px;
+  }
+  .rec-timer.live { color: var(--accent); }
+  .rec-status {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: rgba(15,15,16,0.5);
+    transition: color 0.3s ease;
+  }
+  .rec-status.ok { color: var(--accent); }
+  .rec-status.err { color: #b04545; font-style: normal; }
+
+  .rec-list {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .rec-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--paper-dim);
+    border: 1px solid rgba(15,15,16,0.12);
+    font-family: "Noto Serif TC", serif;
+    font-size: 13px;
+    color: rgba(15,15,16,0.75);
+  }
+  .rec-item .meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .rec-item .meta .icon { color: var(--accent); }
+  .rec-item .filename {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 12px;
+    color: rgba(15,15,16,0.55);
+    word-break: break-all;
+  }
+  .rec-item .duration {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    color: rgba(15,15,16,0.55);
+    font-size: 12px;
+  }
+  .rec-item-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .rec-dl-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 6px 14px;
+    font-family: "Shippori Mincho", serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .rec-dl-btn:hover:not(:disabled) {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rec-dl-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* recording controls row */
+  .rec-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .rec-label-text {
+    font-family: "Shippori Mincho", serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: rgba(15,15,16,0.7);
+  }
+  .rec-select {
+    flex: 1;
+    min-width: 200px;
+    max-width: 360px;
+    background: var(--paper);
+    border: 1px solid rgba(15,15,16,0.3);
+    color: var(--ink);
+    font-family: "Noto Serif TC", serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    cursor: pointer;
+    outline: none;
+  }
+  .rec-select:focus { border-color: var(--accent); }
+  .rec-refresh-btn {
+    background: transparent;
+    border: 1px solid rgba(15,15,16,0.3);
+    color: rgba(15,15,16,0.65);
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rec-refresh-btn:hover {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .rec-refresh-btn.spinning { animation: spin 0.5s linear; }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  .rec-syscheck {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "Noto Serif TC", serif;
+    font-size: 13px;
+    color: rgba(15,15,16,0.7);
+    cursor: pointer;
+    user-select: none;
+  }
+  .rec-syscheck input { cursor: pointer; }
+
+  /* level meter */
+  .rec-meter {
+    margin-top: 12px;
+    height: 8px;
+    background: rgba(15,15,16,0.1);
+    border: 1px solid rgba(15,15,16,0.2);
+    overflow: hidden;
+    position: relative;
+  }
+  .rec-meter-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,
+      var(--ink) 0%,
+      var(--ink) 60%,
+      #c97a2a 75%,
+      var(--accent) 100%);
+    transition: width 0.06s linear;
+  }
+  .rec-meter-bar.hot { background: var(--accent); }
+
+  /* danger button */
+  .btn-danger {
+    color: var(--accent);
+    border-color: rgba(139,26,26,0.5) !important;
+  }
+  .btn-danger:hover {
+    background: var(--accent) !important;
+    color: var(--paper) !important;
+    border-color: var(--accent) !important;
+  }
+
+  /* history delete button + body wrap */
+  .history-item .h-body { flex: 1; }
+  .h-del {
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid rgba(15,15,16,0.25);
+    color: rgba(15,15,16,0.5);
+    width: 28px;
+    height: 28px;
+    line-height: 1;
+    font-size: 16px;
+    font-family: "Cormorant Garamond", serif;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-left: 8px;
+  }
+  .h-del:hover {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+  .history-item:hover .h-del {
+    color: rgba(244,239,230,0.7);
+    border-color: rgba(244,239,230,0.4);
+  }
+  .history-item:hover .h-del:hover {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  /* history recording indicator */
+  .h-rec-mark {
+    display: inline-block;
+    margin-left: 8px;
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
+  /* clear history button */
+  .history-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
+  }
+  .btn-text {
+    background: transparent;
+    border: none;
+    color: rgba(15,15,16,0.5);
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    letter-spacing: 0.15em;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .btn-text:hover { color: var(--accent); }
+
+  .actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    padding: 12px 26px;
+    font-family: "Shippori Mincho", "Noto Serif TC", serif;
+    font-size: 15px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn.primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn.primary:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .btn.copied {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  /* loading state */
+  .loading {
+    text-align: center;
+    padding: 80px 0;
+  }
+  .loading-text {
+    font-family: "Shippori Mincho", serif;
+    font-size: 22px;
+    letter-spacing: 0.3em;
+    color: var(--ink);
+    opacity: 0;
+    animation: fadeBlink 1.6s ease-in-out infinite;
+  }
+  @keyframes fadeBlink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  .loading-sub {
+    margin-top: 12px;
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    color: rgba(15,15,16,0.5);
+    letter-spacing: 0.15em;
+    font-size: 14px;
+  }
+
+  /* error */
+  .error {
+    background: var(--accent);
+    color: var(--paper);
+    padding: 16px 22px;
+    border: 1px solid var(--ink);
+    margin-top: 24px;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .error b { font-weight: 700; }
+
+  /* history */
+  .history {
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(15,15,16,0.15);
+  }
+  .history-title {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(15,15,16,0.5);
+    margin-bottom: 28px;
+  }
+  .history-title::before { content: "—— "; }
+  .history-list { display: flex; flex-direction: column; gap: 16px; }
+  .history-item {
+    border: 1px solid rgba(15,15,16,0.15);
+    background: rgba(15,15,16,0.02);
+    padding: 20px 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .history-item:hover {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .history-item:hover .h-cat {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .history-item .h-no {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 13px;
+    opacity: 0.5;
+    min-width: 36px;
+    padding-top: 4px;
+  }
+  .h-cat {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3px 10px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .h-q {
+    font-family: "Shippori Mincho", serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .history-item > div { flex: 1; }
+
+  /* settings modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+  .modal-backdrop.visible { display: flex; }
+  .modal {
+    background: var(--paper);
+    color: var(--ink);
+    padding: 40px;
+    max-width: 480px;
+    width: 90%;
+    border: 1px solid var(--ink);
+    box-shadow: 12px 12px 0 0 var(--accent);
+    position: relative;
+  }
+  .modal h2 {
+    font-family: "Shippori Mincho", serif;
+    font-size: 22px;
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+  }
+  .modal p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(15,15,16,0.7);
+    margin-bottom: 24px;
+  }
+  .modal label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+    color: rgba(15,15,16,0.7);
+  }
+  .modal input, .modal select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 18px;
+    outline: none;
+  }
+  .modal input:focus, .modal select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(139,26,26,0.2);
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .modal a { color: var(--accent); }
+
+  @media (max-width: 860px) {
+    .hero-content { grid-template-columns: 1fr; padding: 0 6vw; }
+    .hero-character { display: none; }
+    .hero-title { font-size: clamp(40px, 12vw, 64px); }
+    .question-card { padding: 36px 28px; box-shadow: 8px 8px 0 0 var(--ink); }
+    .stage { padding: 60px 5vw; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="topbar">
+    <div class="left">叩問　— a galgame discussion question generator</div>
+    <div class="right">
+      <span id="dateStr"></span>
+      <button id="settingsBtn" title="設定">⚙ 設定</button>
+    </div>
+  </div>
+
+  <div class="vertical-mark">問　以　不　可　解　明　之　事</div>
+
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Wonderful Everyday, with a question</div>
+      <h1 class="hero-title">叩 <span class="red">問</span></h1>
+      <div class="hero-quotes">
+        <p>「文學性並非什麼高尚之物，而是關於人類性的語言。」</p>
+        <p class="attr">── SCA-自</p>
+        <p style="margin-top:18px;">「我們藉由故事，向人生、向世界、向不可解明之事發出叩問。」</p>
+      </div>
+      <button id="askBtn" class="cta">
+        <span>由 崎 姐 出 題</span>
+        <span class="arrow">→</span>
+      </button>
+    </div>
+
+    <div class="hero-character">
+      <img id="charImg" src="./yuki.png" alt="由崎姐"
+           onerror="this.style.display='none'" />
+    </div>
+  </div>
+</section>
+
+<section id="stage" class="stage">
+  <div class="stage-inner">
+    <div id="questionArea"></div>
+    <div id="errorArea"></div>
+
+    <div id="historyWrap" class="history" style="display:none;">
+      <div class="history-title">過往叩問　Past Questions</div>
+      <div id="historyList" class="history-list"></div>
+      <div class="history-actions">
+        <button id="clearHistoryBtn" class="btn-text">清空歷史　×</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- settings modal -->
+<div id="modal" class="modal-backdrop">
+  <div class="modal">
+    <h2>叩問　設定</h2>
+    <p>需要 Google Gemini API Key 才能由崎姐出題。請至
+      <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a> 取得，免費。
+      Key 只存於瀏覽器本地（localStorage），不會上傳。
+    </p>
+    <label>GEMINI API KEY</label>
+    <input id="apiKeyInput" type="password" placeholder="AIza..." autocomplete="off" />
+    <label>MODEL</label>
+    <select id="modelSelect">
+      <option value="gemini-2.5-flash">gemini-2.5-flash（推薦）</option>
+      <option value="gemini-2.5-pro">gemini-2.5-pro（更深思）</option>
+      <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+    </select>
+    <label>創意溫度（temperature）</label>
+    <input id="tempInput" type="number" min="0" max="2" step="0.1" value="1.2" />
+    <div class="modal-actions">
+      <button class="btn" id="modalCancel">取消</button>
+      <button class="btn primary" id="modalSave">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========================================================
+ *  叩問 — Galgame discussion question generator
+ *  Uses Google Gemini API
+ * ====================================================== */
+
+const SYSTEM_PROMPT = `你是一個資深的 Galgame（視覺小說）同好，長期深入閱讀視覺小說作品，並且關注玩家心理、創作論、角色設計、亞文化處境等議題。
+
+現在你要為一個 Galgame 同好討論會出題。這個討論會的精神是：
+
+  「文學性並非什麼高尚之物，而是關於人類性的語言。」── SCA-自
+  「我們藉由故事，向人生、向世界、向不可解明之事發出叩問。」
+
+你的任務是生成「一個值得同好認真討論一兩個小時的問題」。
+
+## 出題風格要求
+
+1. **切入點要歪、要有意思**
+   不要正經的大哉問。要那種「戳到玩家內心癢處」「你以為你知道但其實沒想清楚」的角度。預設讀者是有經驗的玩家，會被「啊，這個問題我從來沒這樣想過」打中。
+
+2. **預設對象是同好，不是新手**
+   可以自然使用「帶入感」「戀愛感」「男性向／女性向」「劇本家」「Hgame」「萌系」「攻略路線」等社群詞彙，不需要解釋。
+
+3. **問句必須白話、直接、口語**
+   ★ 這條最重要 ★
+   問題本身要像你在群組裡丟給朋友的一句話——短、清楚、一秒看懂。
+   - 句子短：核心提問盡量 25 字以內，最多不超過 40 字
+   - 主問句通常一句話就講完；最多兩句
+   - 不要嵌套子句、不要連續用「在……的情況下」「作為一種……的……」這類學術腔
+   - 不要雙重否定、不要繞圈子
+   - 用具體的例子或情境，而不是抽象名詞堆疊
+   深度藏在「問的角度」，不在「句子的複雜度」。
+
+4. **結構**
+   理想是：一句白話的核心問題（讓人秒懂在問什麼），有需要的話再用 context 補背景。
+   不要把鋪陳塞進問題本身。
+
+5. **背景補充（context）**
+   如果問題需要鋪陳，把脈絡放到 context 欄，不超過 3 句、也要白話。
+   並非每題都需要 context。
+
+6. **沒有標準答案**
+   開放式問題，要那種「每個人會有不同看法、看法之間還會打架」的那種題目。
+
+7. **前提必須真實成立**
+   ★ 這條也很重要 ★
+   問題的前提（你假設「大家都怎樣」「玩 Gal 才會怎樣」）必須是真正廣泛存在、玩家會點頭認同的共同經驗。
+   不要為了切角度而硬編一個其實不成立的對比或現象。
+   - 反例：「為什麼玩 Gal 會腦補立繪角色的動作，但看漫畫卻不會？」
+     → 看漫畫一樣會腦補，這個對比根本不成立，問了之後沒人能回答。
+   - 反例：「為什麼 Gal 玩家都不看動畫？」
+     → 假的前提，Gal 玩家很多也看動畫。
+   出題前先問自己：「這個前提，至少 7 成有經驗的玩家會點頭嗎？」如果不會，重想。
+
+## 嚴格禁止
+
+- 是非題、選擇題、封閉式問題
+- 有客觀標準答案的問題（如冷知識、史料考證）
+- 入門問題（「Galgame 是什麼」「為什麼有人喜歡 Galgame」）
+- 空泛的偏好問題（「你最喜歡哪部 Galgame」）
+- 預設立場的引導性問題（「Galgame 為什麼正在衰退」）
+- 繞口、學術腔、長到要回頭重讀的問題
+- 前提虛假或牽強的問題（強行對比兩件其實沒在對比的事）
+
+## 風格範例
+
+【範例 1 — 玩家心理／反思】
+question: 玩 Gal 時你是喜歡這個角色，還是喜歡「她喜歡你」的感覺？
+context: 換句話講——如果你喜歡的角色根本不喜歡你，你還會喜歡她嗎？
+
+【範例 2 — 媒介比較】
+question: 為什麼同樣的劇情，做成 Gal 會哭，做成動畫卻不會？
+context: 是文字的留白？是自己按下一句的節奏？還是因為你也參與在裡面？
+
+【範例 3 — 角色論】
+question: 男性向作品裡的美少女，本質上是「女生」還是「穿女生外皮的男生」？
+
+【範例 4 — 社會文化】
+question: 短影音時代，還會有人願意花 30 小時讀一部 Gal 嗎？
+context: 如果有，那是什麼樣的人？如果沒有，那 Gal 這個媒介還剩下什麼？
+
+【範例 5 — 創作觀】
+question: 一部 Gal 的好壞，到底是劇本家寫得好，還是原畫畫得好決定的？
+
+【範例 6 — 玩家心理／反思】
+question: 如果你能選擇，你是希望角色「現實中存在但跟你無關」，還是「只存在二次元但她永遠愛你」？
+
+【反例（不要這樣寫）】
+✗「視覺小說作為一種需要耗費大量時間且需要專注以獲得最佳體驗的遊戲，在快餐時代、資訊越來越碎片化的現在，是否有辦法能透過特定方式讓原本未接觸視覺小說的人開始接觸視覺小說？」
+   → 太長、太繞、學術腔。應改寫成上面範例 4 那種白話版。
+✗「Galgame 玩家的遊戲帶入視角與對作品『戀愛感』的理解。怎樣的視角才能最體會到遊戲的精隨？」
+   → 第一句是論文標題不是問題；應直接問「你玩 Gal 時是把自己當主角，還是當旁觀者？哪種更會心動？」
+
+## 輸出格式
+
+請以 JSON 格式輸出，不要有任何 Markdown 標記、不要有 \`\`\`json 包裹、不要有任何前言或解釋。直接輸出可以被 JSON.parse() 解析的物件：
+
+{
+  "category": "從以下擇一：玩家心理／作品論／角色論／社會文化／媒介比較／倫理內涵／創作觀",
+  "question": "問題本體（1～2 句話的核心提問）",
+  "context": "背景或觀點補充（可選，不超過 3 句；若不需要請填空字串）"
+}`;
+
+const CATEGORIES = ['玩家心理','作品論','角色論','社會文化','媒介比較','倫理內涵','創作觀'];
+const ANGLES = [
+  '從反直覺的角度提出，挑戰一個社群常見的共識',
+  '結合近年的現象或變化（短影音、AI、雲玩家等）',
+  '對比兩種對立的玩家立場或體驗',
+  '從一個具體的作品現象延伸到普遍性議題',
+  '探討一個玩家很少誠實面對自己的心理／慾望',
+  '從媒介本身的特性（文字 + 立繪 + 語音 + 選擇）去質問',
+  '連結到創作端（劇本家、製作流程、商業壓力）的觀點'
+];
+
+const LOADING_MESSAGES = [
+  '由崎姐沉思中…',
+  '叩　問　中…',
+  '翻閱故事中…',
+  '向不可解明之事發問…',
+  '檢視幻燈片裡的世界…',
+  '推敲文學性的語言…'
+];
+
+// ——— state ———
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem('kowmon_history');
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function saveHistory() {
+  try {
+    localStorage.setItem('kowmon_history', JSON.stringify(state.history));
+  } catch (e) { console.warn('saveHistory failed', e); }
+}
+
+const state = {
+  apiKey: localStorage.getItem('gemini_api_key') || '',
+  model: localStorage.getItem('gemini_model') || 'gemini-2.5-flash',
+  temperature: parseFloat(localStorage.getItem('gemini_temp') || '1.2'),
+  history: loadHistory(),
+  currentIdx: -1,   // index into history of currently displayed question
+  loading: false,
+};
+
+// ——— helpers ———
+const $ = s => document.querySelector(s);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+function setDate() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  $('#dateStr').textContent = `${y}.${m}.${day}`;
+}
+
+function openSettings() {
+  $('#apiKeyInput').value = state.apiKey;
+  $('#modelSelect').value = state.model;
+  $('#tempInput').value = state.temperature;
+  $('#modal').classList.add('visible');
+}
+function closeSettings() {
+  $('#modal').classList.remove('visible');
+}
+function saveSettings() {
+  state.apiKey = $('#apiKeyInput').value.trim();
+  state.model = $('#modelSelect').value;
+  state.temperature = parseFloat($('#tempInput').value) || 1.2;
+  localStorage.setItem('gemini_api_key', state.apiKey);
+  localStorage.setItem('gemini_model', state.model);
+  localStorage.setItem('gemini_temp', String(state.temperature));
+  closeSettings();
+}
+
+// ——— Gemini call ———
+async function generateQuestion() {
+  if (!state.apiKey) {
+    openSettings();
+    throw new Error('請先設定 Gemini API Key');
+  }
+
+  const category = pick(CATEGORIES);
+  const angle = pick(ANGLES);
+  const userPrompt =
+`請生成一個 Galgame 討論問題。
+
+本次面向：${category}
+本次切入角度：${angle}
+
+提醒：
+- 給老玩家也會「噢，這個我沒這樣想過」的題目
+- 主問句用白話、口語、最好 25 字內，最多 40 字
+- 不要學術腔、不要嵌套子句、不要把鋪陳塞進問題本身
+- 鋪陳放 context 欄位（也要白話）；不需要鋪陳就留空字串
+- ★ 出題前自我檢查：問題的前提（你說的「玩 Gal 都會……」「Gal 玩家通常……」）是不是真的成立？如果不是大多數玩家會認同的共同經驗，重想一個。`;
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${state.model}:generateContent?key=${encodeURIComponent(state.apiKey)}`;
+
+  const generationConfig = {
+    responseMimeType: 'application/json',
+    responseSchema: {
+      type: 'object',
+      properties: {
+        category: { type: 'string' },
+        question: { type: 'string' },
+        context: { type: 'string' },
+      },
+      required: ['category', 'question'],
+    },
+    temperature: state.temperature,
+    topP: 0.95,
+    maxOutputTokens: 4096,
+  };
+  if (state.model.startsWith('gemini-2.5')) {
+    generationConfig.thinkingConfig = { thinkingBudget: 0 };
+  }
+
+  const body = {
+    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+    generationConfig,
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`API ${res.status}：${errBody.slice(0, 300)}`);
+  }
+  const data = await res.json();
+  const cand = data?.candidates?.[0];
+  const text = cand?.content?.parts?.[0]?.text;
+  const finishReason = cand?.finishReason;
+
+  if (!text) {
+    throw new Error('Gemini 回應為空（finish: ' + (finishReason || 'unknown') + '）。\n' +
+                    JSON.stringify(data).slice(0, 300));
+  }
+
+  return parseQuestionJSON(text, finishReason);
+}
+
+function parseQuestionJSON(rawText, finishReason) {
+  let text = String(rawText).trim();
+  text = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+
+  try { return JSON.parse(text); } catch (_) {}
+
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start !== -1 && end !== -1 && end > start) {
+    const slice = text.slice(start, end + 1);
+    try { return JSON.parse(slice); } catch (_) {}
+  }
+
+  const grab = (key) => {
+    const re = new RegExp('"' + key + '"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"', 's');
+    const m = text.match(re);
+    return m ? m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\') : '';
+  };
+  const category = grab('category');
+  const question = grab('question');
+  const context = grab('context');
+  if (question) return { category: category || '討論', question, context };
+
+  throw new Error(
+    `JSON 解析失敗（finish: ${finishReason || 'unknown'}）。\n` +
+    `原始片段：${text.slice(0, 200)}…\n` +
+    `提示：可能是輸出被截斷或模型沒回 JSON，可在設定降低 temperature、或換成 gemini-2.5-pro。`
+  );
+}
+
+// ——— rendering ———
+function renderLoading() {
+  const msg = pick(LOADING_MESSAGES);
+  $('#questionArea').innerHTML = `
+    <div class="question-card">
+      <div class="corner-mark">no. ${String(state.history.length + 1).padStart(3,'0')}</div>
+      <div class="loading">
+        <div class="loading-text">${msg}</div>
+        <div class="loading-sub">— gemini is contemplating —</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderQuestion(idx) {
+  const q = state.history[idx];
+  if (!q) return;
+  state.currentIdx = idx;
+  const no = idx + 1;
+  const ctx = (q.context && q.context.trim()) ? q.context.trim() : '';
+  const recs = Array.isArray(q.recordings) ? q.recordings : [];
+
+  $('#questionArea').innerHTML = `
+    <div class="question-card">
+      <div class="corner-mark">no. ${String(no).padStart(3,'0')}</div>
+      <div class="question-meta">
+        <span class="question-category">${escapeHtml(q.category || '討論')}</span>
+        <span class="question-no">由崎姐出題　第 ${no} 問</span>
+      </div>
+      <div class="question-body">${escapeHtml(q.question || '')}</div>
+      ${ctx ? `<div class="question-context">${escapeHtml(ctx)}</div>` : ''}
+
+      <div class="rec-wrap">
+        <div class="rec-row">
+          <span class="rec-label-text">麥克風</span>
+          <select id="recMicSelect" class="rec-select">
+            <option value="">— 預設裝置 —</option>
+          </select>
+          <button id="recRefreshBtn" class="rec-refresh-btn" type="button" title="重新整理裝置列表">🔄</button>
+          <label class="rec-syscheck" title="勾選後會額外擷取電腦的系統音訊（需在分享對話框勾「分享音訊」）">
+            <input id="recSysCheck" type="checkbox"> 包含裝置音訊
+          </label>
+          <button id="recBtn" class="rec-btn">
+            <span class="dot"></span>
+            <span id="recBtnLabel">開　始　錄　音</span>
+          </button>
+          <span id="recTimer" class="rec-timer">00:00</span>
+          <span id="recStatus" class="rec-status"></span>
+        </div>
+        <div class="rec-meter" title="輸入音量（即時）">
+          <div id="recMeter" class="rec-meter-bar"></div>
+        </div>
+        <div id="recList" class="rec-list"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="againBtn">再來一題　→</button>
+        <button class="btn" id="copyBtn">複製問題</button>
+        <button class="btn btn-danger" id="delQBtn">刪除此題</button>
+      </div>
+    </div>
+  `;
+
+  $('#againBtn').addEventListener('click', ask);
+  $('#delQBtn').addEventListener('click', () => deleteQuestionAt(state.currentIdx));
+  $('#copyBtn').addEventListener('click', (e) => {
+    const text =
+      `【${q.category}】${q.question}` +
+      (ctx ? `\n\n（${ctx}）` : '');
+    navigator.clipboard.writeText(text).then(() => {
+      e.target.classList.add('copied');
+      e.target.textContent = '已複製 ✓';
+      setTimeout(() => {
+        e.target.classList.remove('copied');
+        e.target.textContent = '複製問題';
+      }, 1800);
+    });
+  });
+
+  setupRecorder(q);
+  renderRecList(q);
+}
+
+// ——— recording ———
+const rec = {
+  recording: false,
+  startedAt: 0,
+  timerId: null,
+  audioCtx: null,
+  meterRaf: null,
+  mp3Chunks: [],
+};
+
+function setRecStatus(msg, kind) {
+  const el = $('#recStatus');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.className = 'rec-status' + (kind ? ' ' + kind : '');
+}
+
+function fmtTime(ms) {
+  const s = Math.floor(ms / 1000);
+  const mm = String(Math.floor(s / 60)).padStart(2, '0');
+  const ss = String(s % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
+}
+
+function sanitizeFilename(s, maxLen = 40) {
+  let out = String(s)
+    .replace(/[\\/:*?"<>|]/g, '')   // illegal on win
+    .replace(/[\s　]+/g, '_')   // collapse spaces
+    .replace(/[【】「」『』]/g, '')
+    .replace(/__+/g, '_')
+    .trim()
+    .replace(/^_+|_+$/g, '');
+  if (out.length > maxLen) out = out.slice(0, maxLen);
+  return out || 'untitled';
+}
+
+// ——— MP3 recording (mic only, lamejs) ———
+let micStream = null;       // 持久 mic stream
+let sysStream = null;       // 持久 system audio stream
+const blobCache = new Map(); // ts -> Blob，僅 session 內
+
+function isStreamLive(s) {
+  return !!(s && s.getAudioTracks().some(t => t.readyState === 'live'));
+}
+
+function getSavedDeviceId() {
+  return localStorage.getItem('kowmon_micDevice') || '';
+}
+function saveDeviceId(id) {
+  localStorage.setItem('kowmon_micDevice', id || '');
+}
+
+async function ensureMicStream(deviceId) {
+  // 若已有 live stream 且 device 一致，直接複用（避免重複跳授權）
+  if (isStreamLive(micStream)) {
+    const t = micStream.getAudioTracks()[0];
+    const cur = t && t.getSettings ? t.getSettings().deviceId : null;
+    if (!deviceId || cur === deviceId) {
+      console.log('叩問 — 複用現有 mic stream:', t && t.label);
+      return micStream;
+    }
+    console.log('叩問 — 換裝置，停掉舊 stream');
+    micStream.getTracks().forEach(tr => tr.stop());
+    micStream = null;
+  }
+  console.log('叩問 — 取得新 mic stream，deviceId:', deviceId || '(default)');
+  const constraints = {
+    audio: deviceId
+      ? { deviceId: { exact: deviceId }, echoCancellation: true, noiseSuppression: true }
+      : { echoCancellation: true, noiseSuppression: true },
+  };
+  const s = await navigator.mediaDevices.getUserMedia(constraints);
+  // 監聽：track 被外部結束（裝置拔掉、OS 撤銷權限）時自動清掉
+  s.getAudioTracks().forEach(tr => {
+    tr.addEventListener('ended', () => {
+      console.warn('叩問 — mic track ended:', tr.label);
+      if (micStream === s) micStream = null;
+    });
+  });
+  micStream = s;
+  // 拿到授權後立刻刷一次裝置列表（label 會出現）
+  refreshMicDeviceList();
+  return s;
+}
+
+async function ensureSysStream() {
+  if (isStreamLive(sysStream)) {
+    console.log('叩問 — 複用現有 system audio stream');
+    return sysStream;
+  }
+  console.log('叩問 — 取得新 system audio stream');
+  const s = await navigator.mediaDevices.getDisplayMedia({
+    video: { width: 1, height: 1, frameRate: 1 },
+    audio: true,
+  });
+  // 視訊軌不需要，立即關掉
+  s.getVideoTracks().forEach(t => t.stop());
+  if (s.getAudioTracks().length === 0) {
+    throw new Error('未取得裝置音訊。請在分享視窗時勾選「分享音訊」/「Share tab audio」。');
+  }
+  s.getAudioTracks().forEach(tr => {
+    tr.addEventListener('ended', () => {
+      console.warn('叩問 — system audio track ended');
+      if (sysStream === s) sysStream = null;
+    });
+  });
+  sysStream = s;
+  return s;
+}
+
+async function refreshMicDeviceList() {
+  const sel = $('#recMicSelect');
+  if (!sel) return;
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const inputs = devices.filter(d => d.kind === 'audioinput');
+    const saved = getSavedDeviceId();
+    const hasLabels = inputs.some(d => d.label);
+    console.log('叩問 — 找到', inputs.length, '個音訊輸入裝置，有 label:', hasLabels);
+
+    const opts = inputs.map((d, i) => {
+      const label = d.label || `音訊裝置 ${i + 1}（授權後顯示名稱）`;
+      const val = d.deviceId || '';
+      return `<option value="${escapeHtml(val)}">${escapeHtml(label)}</option>`;
+    }).join('');
+    sel.innerHTML = '<option value="">— 預設裝置 —</option>' + opts;
+
+    // 還原儲存的選擇
+    if (saved && inputs.some(d => d.deviceId === saved)) {
+      sel.value = saved;
+    }
+  } catch (e) {
+    console.warn('叩問 — enumerateDevices 失敗:', e);
+  }
+}
+
+function floatTo16BitPCM(input) {
+  const out = new Int16Array(input.length);
+  for (let i = 0; i < input.length; i++) {
+    let s = Math.max(-1, Math.min(1, input[i]));
+    out[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+  }
+  return out;
+}
+
+async function startRecording(q) {
+  setRecStatus('準備中…');
+  if (typeof lamejs === 'undefined') {
+    setRecStatus('MP3 編碼器尚未載入', 'err');
+    return;
+  }
+
+  rec.mp3Chunks = [];
+  try {
+    const deviceId = $('#recMicSelect').value || '';
+    const wantSys = $('#recSysCheck') && $('#recSysCheck').checked;
+
+    const mStream = await ensureMicStream(deviceId);
+    let sStream = null;
+    if (wantSys) {
+      try {
+        sStream = await ensureSysStream();
+      } catch (e) {
+        setRecStatus('裝置音訊失敗：' + e.message + '（僅錄麥克風）', 'err');
+        sStream = null;
+      }
+    }
+
+    refreshMicDeviceList();
+
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') {
+      try { await ctx.resume(); } catch (e) {}
+    }
+    rec.audioCtx = ctx;
+    const sampleRate = ctx.sampleRate;
+    const mt = mStream.getAudioTracks()[0];
+    const st = sStream && sStream.getAudioTracks()[0];
+    console.log('叩問錄音 — 麥克風:', mt && mt.label, '| 裝置音訊:', st && st.label, '| sampleRate:', sampleRate);
+
+    // 混音節點
+    const mixer = ctx.createGain();
+    mixer.gain.value = 1.0;
+
+    const micNode = ctx.createMediaStreamSource(mStream);
+    micNode.connect(mixer);
+    if (sStream) {
+      const sysNode = ctx.createMediaStreamSource(sStream);
+      sysNode.connect(mixer);
+    }
+
+    // analyser 給音量計（看混音後的總音量）
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 512;
+    mixer.connect(analyser);
+    rec.analyser = analyser;
+
+    // ScriptProcessor 編 MP3
+    const BUFFER_SIZE = 4096;
+    const processor = ctx.createScriptProcessor(BUFFER_SIZE, 2, 1);
+    rec.mp3Encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
+
+    processor.onaudioprocess = (ev) => {
+      if (!rec.recording) return;
+      const ib = ev.inputBuffer;
+      const ch0 = ib.getChannelData(0);
+      const ch1 = ib.numberOfChannels > 1 ? ib.getChannelData(1) : ch0;
+      const mono = new Float32Array(ch0.length);
+      for (let i = 0; i < ch0.length; i++) mono[i] = (ch0[i] + ch1[i]) * 0.5;
+      const pcm16 = floatTo16BitPCM(mono);
+      const buf = rec.mp3Encoder.encodeBuffer(pcm16);
+      if (buf.length > 0) rec.mp3Chunks.push(new Uint8Array(buf));
+    };
+
+    mixer.connect(processor);
+    const silentGain = ctx.createGain();
+    silentGain.gain.value = 0;
+    processor.connect(silentGain);
+    silentGain.connect(ctx.destination);
+    rec.processor = processor;
+    rec.silentGain = silentGain;
+
+    rec.recording = true;
+    rec.startedAt = Date.now();
+    rec.timerId = setInterval(() => {
+      const tv = Date.now() - rec.startedAt;
+      const tEl = $('#recTimer');
+      if (tEl) { tEl.textContent = fmtTime(tv); tEl.classList.add('live'); }
+    }, 250);
+
+    startMeter();
+
+    const btn = $('#recBtn');
+    btn.classList.add('recording');
+    $('#recBtnLabel').textContent = '停　止　錄　音';
+    setRecStatus('錄製中', 'ok');
+  } catch (e) {
+    teardownGraph();
+    setRecStatus(e.message || String(e), 'err');
+    const btn = $('#recBtn');
+    if (btn) {
+      btn.classList.remove('recording');
+      $('#recBtnLabel').textContent = '開　始　錄　音';
+    }
+  }
+}
+
+function stopRecording() {
+  if (!rec.recording) return;
+  rec.recording = false;
+  try {
+    const tail = rec.mp3Encoder.flush();
+    if (tail.length > 0) rec.mp3Chunks.push(new Uint8Array(tail));
+  } catch (e) {}
+  try { rec.processor && rec.processor.disconnect(); } catch (e) {}
+  try { rec.silentGain && rec.silentGain.disconnect(); } catch (e) {}
+  finalizeRecording(getCurrentQuestion());
+}
+
+function getCurrentQuestion() {
+  const i = state.currentIdx;
+  return (i >= 0 && state.history[i]) ? state.history[i] : null;
+}
+
+function teardownGraph() {
+  if (rec.meterRaf) { cancelAnimationFrame(rec.meterRaf); rec.meterRaf = null; }
+  if (rec.audioCtx) { try { rec.audioCtx.close(); } catch (e) {} rec.audioCtx = null; }
+  if (rec.timerId) { clearInterval(rec.timerId); rec.timerId = null; }
+  rec.processor = null;
+  rec.analyser = null;
+  rec.silentGain = null;
+  rec.mp3Encoder = null;
+  const bar = $('#recMeter');
+  if (bar) bar.style.width = '0%';
+}
+
+function startMeter() {
+  const buf = new Uint8Array(rec.analyser.fftSize);
+  const tick = () => {
+    if (!rec.analyser) return;
+    rec.analyser.getByteTimeDomainData(buf);
+    let sum = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const v = (buf[i] - 128) / 128;
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / buf.length);
+    const pct = Math.min(100, Math.round(rms * 200));
+    const bar = $('#recMeter');
+    if (bar) {
+      bar.style.width = pct + '%';
+      bar.classList.toggle('hot', pct > 80);
+    }
+    rec.meterRaf = requestAnimationFrame(tick);
+  };
+  rec.meterRaf = requestAnimationFrame(tick);
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function finalizeRecording(q) {
+  if (!q) { teardownGraph(); return; }
+  const durationMs = Date.now() - rec.startedAt;
+  const blob = new Blob(rec.mp3Chunks, { type: 'audio/mpeg' });
+  const idx = state.history.indexOf(q);
+  const no = idx >= 0 ? idx + 1 : '?';
+  const stamp = new Date().toISOString().replace(/[:T]/g, '-').replace(/\..+/, '').replace('-', '_').slice(0, 16);
+  const qSlug = sanitizeFilename(q.question, 40);
+  const filename = `叩問_no${String(no).padStart(3,'0')}_${qSlug}_${stamp}.mp3`;
+  const ts = Date.now();
+
+  downloadBlob(blob, filename);
+
+  if (!Array.isArray(q.recordings)) q.recordings = [];
+  q.recordings.push({ filename, durationMs, ts, sizeBytes: blob.size });
+  blobCache.set(ts, blob);
+  saveHistory();
+
+  teardownGraph();
+  rec.mp3Chunks = [];
+
+  const btn = $('#recBtn');
+  if (btn) {
+    btn.classList.remove('recording');
+    $('#recBtnLabel').textContent = '開　始　錄　音';
+  }
+  const tEl = $('#recTimer');
+  if (tEl) { tEl.textContent = '00:00'; tEl.classList.remove('live'); }
+  setRecStatus('已存檔 ✓ MP3', 'ok');
+  setTimeout(() => setRecStatus('', ''), 2400);
+
+  renderRecList(q);
+  renderHistory();
+}
+
+function setupRecorder(q) {
+  $('#recBtn').addEventListener('click', () => {
+    if (rec.recording) stopRecording();
+    else startRecording(q);
+  });
+  const sel = $('#recMicSelect');
+  if (sel) {
+    sel.addEventListener('change', () => {
+      saveDeviceId(sel.value);
+      console.log('叩問 — 換裝置:', sel.value || '(default)');
+      // 換裝置時，現有 stream 用的是舊裝置 → 停掉，下次錄音重新取得
+      if (micStream) {
+        micStream.getTracks().forEach(t => t.stop());
+        micStream = null;
+      }
+    });
+  }
+  const sc = $('#recSysCheck');
+  if (sc) {
+    sc.checked = localStorage.getItem('kowmon_sysAudio') === '1';
+    sc.addEventListener('change', () => {
+      localStorage.setItem('kowmon_sysAudio', sc.checked ? '1' : '0');
+      // 若取消勾選，停掉現有的 sys stream
+      if (!sc.checked && sysStream) {
+        sysStream.getTracks().forEach(t => t.stop());
+        sysStream = null;
+      }
+    });
+  }
+  const refreshBtn = $('#recRefreshBtn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', async () => {
+      refreshBtn.classList.add('spinning');
+      // 若還沒授權，先試著取得權限以拿到 device labels
+      if (!isStreamLive(micStream)) {
+        try {
+          const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+          // 立刻停掉這個臨時 stream（我們只是要授權）
+          s.getTracks().forEach(t => t.stop());
+        } catch (e) {
+          console.warn('叩問 — 授權失敗:', e.message);
+        }
+      }
+      await refreshMicDeviceList();
+      setTimeout(() => refreshBtn.classList.remove('spinning'), 400);
+    });
+  }
+  refreshMicDeviceList();
+}
+
+function deleteQuestionAt(idx) {
+  const q = state.history[idx];
+  if (!q) return;
+  const preview = (q.question || '').slice(0, 30);
+  if (!confirm(`確定刪除這題？
+
+「${preview}…」
+
+（已下載的錄音檔不會被刪除，但這題的歷史紀錄會消失）`)) return;
+  // 清掉該題的 blobCache 條目
+  if (Array.isArray(q.recordings)) {
+    q.recordings.forEach(r => blobCache.delete(r.ts));
+  }
+  state.history.splice(idx, 1);
+  // 修正 currentIdx
+  if (state.currentIdx === idx) {
+    state.currentIdx = -1;
+    $('#questionArea').innerHTML = '';
+  } else if (state.currentIdx > idx) {
+    state.currentIdx -= 1;
+  }
+  saveHistory();
+  renderHistory();
+  if (state.currentIdx >= 0) renderQuestion(state.currentIdx);
+  if (state.history.length === 0) {
+    $('#stage').classList.remove('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function renderRecList(q) {
+  const recs = Array.isArray(q.recordings) ? q.recordings : [];
+  const el = $('#recList');
+  if (!el) return;
+  if (recs.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = recs.slice().reverse().map(r => {
+    const hasBlob = blobCache.has(r.ts);
+    return `
+    <div class="rec-item">
+      <div class="meta">
+        <span class="icon">●</span>
+        <span class="filename">${escapeHtml(r.filename)}</span>
+      </div>
+      <div class="rec-item-right">
+        <span class="duration">${fmtTime(r.durationMs)}　·　${(r.sizeBytes/1024/1024).toFixed(2)} MB</span>
+        <button class="rec-dl-btn" data-ts="${r.ts}" ${hasBlob ? '' : 'disabled title="此錄音不在此 session 記憶中（重整後丟失）"'}>下載</button>
+      </div>
+    </div>
+  `; }).join('');
+  el.querySelectorAll('.rec-dl-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ts = parseInt(btn.dataset.ts, 10);
+      const blob = blobCache.get(ts);
+      const meta = recs.find(r => r.ts === ts);
+      if (blob && meta) downloadBlob(blob, meta.filename);
+    });
+  });
+}
+
+function renderError(err) {
+  $('#errorArea').innerHTML = `
+    <div class="error">
+      <b>叩問失敗。</b><br/>${escapeHtml(err.message || String(err))}
+    </div>
+  `;
+}
+
+function renderHistory() {
+  const others = state.history
+    .map((h, i) => ({ h, i }))
+    .filter(x => x.i !== state.currentIdx);
+
+  if (others.length === 0) {
+    $('#historyWrap').style.display = 'none';
+    return;
+  }
+  $('#historyWrap').style.display = 'block';
+
+  const past = others.slice().reverse();
+  $('#historyList').innerHTML = past.map(({ h, i }) => {
+    const no = i + 1;
+    const recCount = Array.isArray(h.recordings) ? h.recordings.length : 0;
+    const recMark = recCount > 0
+      ? `<span class="h-rec-mark">● 已錄音 ×${recCount}</span>`
+      : '';
+    return `
+      <div class="history-item" data-idx="${i}">
+        <div class="h-no">no.${String(no).padStart(3,'0')}</div>
+        <div class="h-body">
+          <div class="h-cat">${escapeHtml(h.category || '討論')}${recMark}</div>
+          <div class="h-q">${escapeHtml(h.question || '')}</div>
+        </div>
+        <button class="h-del" data-idx="${i}" title="刪除此題">×</button>
+      </div>
+    `;
+  }).join('');
+
+  $('#historyList').querySelectorAll('.history-item').forEach(el => {
+    el.addEventListener('click', (ev) => {
+      if (ev.target.classList.contains('h-del')) return;
+      const idx = parseInt(el.dataset.idx, 10);
+      renderQuestion(idx);
+      renderHistory();
+      window.scrollTo({ top: $('#stage').offsetTop - 20, behavior: 'smooth' });
+    });
+  });
+  $('#historyList').querySelectorAll('.h-del').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const idx = parseInt(btn.dataset.idx, 10);
+      deleteQuestionAt(idx);
+    });
+  });
+}
+
+function clearHistory() {
+  if (!confirm('確定要清空所有過往叩問紀錄？已下載的錄音檔不會被刪除，但這份題目歷史會清空。')) return;
+  state.history = [];
+  state.currentIdx = -1;
+  blobCache.clear();
+  saveHistory();
+  $('#questionArea').innerHTML = '';
+  $('#errorArea').innerHTML = '';
+  renderHistory();
+  $('#stage').classList.remove('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function ask() {
+  $('#errorArea').innerHTML = '';
+  $('#stage').classList.add('visible');
+  window.scrollTo({ top: $('#stage').offsetTop - 20, behavior: 'smooth' });
+
+  state.loading = true;
+  $('#askBtn').disabled = true;
+  renderLoading();
+
+  try {
+    const q = await generateQuestion();
+    q.recordings = [];
+    q.ts = Date.now();
+    state.history.push(q);
+    saveHistory();
+    renderQuestion(state.history.length - 1);
+    renderHistory();
+  } catch (e) {
+    renderError(e);
+    $('#questionArea').innerHTML = '';
+  } finally {
+    state.loading = false;
+    $('#askBtn').disabled = false;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setDate();
+  $('#askBtn').addEventListener('click', ask);
+  $('#settingsBtn').addEventListener('click', openSettings);
+  $('#modalCancel').addEventListener('click', closeSettings);
+  $('#modalSave').addEventListener('click', saveSettings);
+  $('#clearHistoryBtn').addEventListener('click', clearHistory);
+  $('#modal').addEventListener('click', (e) => {
+    if (e.target === $('#modal')) closeSettings();
+  });
+
+  if (state.history.length > 0) {
+    $('#stage').classList.add('visible');
+    renderQuestion(state.history.length - 1);
+    renderHistory();
+  }
+
+  if (!state.apiKey) {
+    console.log('%c叩問　— 請先點右上角設定填入 Gemini API Key', 'color:#8b1a1a;font-weight:bold;font-size:14px');
+  }
+  if (typeof lamejs === 'undefined') {
+    console.warn('叩問 — lamejs (MP3 編碼器) 尚未載入；請確認 lame.min.js 是否在同資料夾。');
+  }
+
+  // 裝置插拔自動更新列表
+  if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+    navigator.mediaDevices.addEventListener('devicechange', () => {
+      console.log('叩問 — 偵測到裝置變更，重新列舉');
+      refreshMicDeviceList();
+    });
+  }
+
+  refreshMicDeviceList();
+});
+</script>
+</body>
+</html>
